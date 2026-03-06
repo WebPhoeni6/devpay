@@ -51,8 +51,8 @@ export default function InvoiceCreatePage() {
   return (
     <div className="max-w-xl space-y-6">
       <div>
-        <h1 className="text-xl font-bold text-[#1A1A2E]">New Invoice</h1>
-        <p className="text-sm text-[#6B7280]">Fill in the details below to create an invoice</p>
+        <h1 className="text-xl font-bold text-[var(--text-primary)]">New Invoice</h1>
+        <p className="text-sm text-[var(--text-secondary)]">Fill in the details below to create an invoice</p>
       </div>
 
       <Card>
@@ -67,13 +67,13 @@ export default function InvoiceCreatePage() {
           />
 
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-[#1A1A2E]">Client</label>
+            <label className="text-sm font-medium text-[var(--text-primary)]">Client</label>
             <select
               name="client"
               value={form.client}
               onChange={handleChange}
               required
-              className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3B3FD8] focus:border-transparent"
+              className="border border-[color:var(--border-muted)] bg-[var(--bg-surface)] text-[var(--text-primary)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
             >
               <option value="">Select a client</option>
               {clients.map((c) => (
@@ -104,24 +104,24 @@ export default function InvoiceCreatePage() {
           />
 
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-[#1A1A2E]">Description</label>
+            <label className="text-sm font-medium text-[var(--text-primary)]">Description</label>
             <textarea
               name="description"
               value={form.description}
               onChange={handleChange}
               rows={3}
               placeholder="Optional notes..."
-              className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3B3FD8] focus:border-transparent resize-none"
+              className="border border-[color:var(--border-muted)] bg-[var(--bg-surface)] text-[var(--text-primary)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent resize-none"
             />
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-[#1A1A2E]">Status</label>
+            <label className="text-sm font-medium text-[var(--text-primary)]">Status</label>
             <select
               name="status"
               value={form.status}
               onChange={handleChange}
-              className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3B3FD8] focus:border-transparent"
+              className="border border-[color:var(--border-muted)] bg-[var(--bg-surface)] text-[var(--text-primary)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
             >
               <option value="draft">Draft</option>
               <option value="sent">Sent</option>

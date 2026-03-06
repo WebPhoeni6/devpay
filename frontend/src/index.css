@@ -1,19 +1,94 @@
 @import "tailwindcss";
 
-@theme {
-  --color-primary: #3B3FD8;
-  --color-primary-light: #E8E9FB;
-  --color-surface: #FFFFFF;
-  --color-background: #F5F6FA;
-  --color-text-primary: #1A1A2E;
-  --color-text-secondary: #6B7280;
-  --color-border: #E5E7EB;
+:root {
+  --font-family-sans: "Inter", sans-serif;
 
-  --font-family-sans: 'Inter', sans-serif;
+  --bg-app: #f3f5fa;
+  --bg-surface: #ffffff;
+  --bg-surface-muted: #eef2ff;
+  --bg-sidebar: #ffffff;
+  --bg-overlay: rgba(15, 23, 42, 0.45);
+
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+
+  --border: #e2e8f0;
+  --border-muted: #cbd5e1;
+
+  --primary: #4338ca;
+  --primary-hover: #3730a3;
+  --primary-soft: #e0e7ff;
+
+  --danger: #dc2626;
+  --danger-soft: #fee2e2;
+  --success: #16a34a;
+  --success-soft: #dcfce7;
+  --warning: #ca8a04;
+  --warning-soft: #fef9c3;
+  --info: #2563eb;
+  --info-soft: #dbeafe;
+
+  --row-hover: #f8fafc;
+  --row-selected: #e0e7ff;
+  --shadow-card: 0 10px 28px -22px rgba(15, 23, 42, 0.45);
+
+  --chart-total: #6366f1;
+  --chart-paid: #312e81;
+  --chart-axis: #475569;
+  --tooltip-bg: #ffffff;
+}
+
+:root[data-theme="dark"] {
+  --bg-app: #040711;
+  --bg-surface: #0c1325;
+  --bg-surface-muted: #121a2d;
+  --bg-sidebar: #090f1f;
+  --bg-overlay: rgba(2, 6, 23, 0.72);
+
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #7f92af;
+
+  --border: #1f2a44;
+  --border-muted: #263456;
+
+  --primary: #818cf8;
+  --primary-hover: #a5b4fc;
+  --primary-soft: #1c2953;
+
+  --danger: #f87171;
+  --danger-soft: #3b1417;
+  --success: #4ade80;
+  --success-soft: #12311f;
+  --warning: #facc15;
+  --warning-soft: #362f0e;
+  --info: #60a5fa;
+  --info-soft: #13273d;
+
+  --row-hover: #111c35;
+  --row-selected: #1b2a52;
+  --shadow-card: 0 20px 45px -35px rgba(2, 6, 23, 0.95);
+
+  --chart-total: #334155;
+  --chart-paid: #818cf8;
+  --chart-axis: #94a3b8;
+  --tooltip-bg: #0f172a;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
 }
 
 body {
   font-family: var(--font-family-sans);
-  background-color: #F5F6FA;
-  color: #1A1A2E;
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  transition: background-color 180ms ease, color 180ms ease;
+}
+
+* {
+  border-color: var(--border);
 }

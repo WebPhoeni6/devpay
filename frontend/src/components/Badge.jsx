@@ -1,16 +1,33 @@
 const statusStyles = {
-  paid: 'bg-green-100 text-green-700',
-  unpaid: 'bg-red-100 text-red-600',
-  draft: 'bg-yellow-100 text-yellow-700',
-  sent: 'bg-blue-100 text-blue-700',
-  overdue: 'bg-red-100 text-red-700',
+  paid: {
+    background: 'var(--success-soft)',
+    color: 'var(--success)',
+  },
+  unpaid: {
+    background: 'var(--danger-soft)',
+    color: 'var(--danger)',
+  },
+  draft: {
+    background: 'var(--warning-soft)',
+    color: 'var(--warning)',
+  },
+  sent: {
+    background: 'var(--info-soft)',
+    color: 'var(--info)',
+  },
+  overdue: {
+    background: 'var(--danger-soft)',
+    color: 'var(--danger)',
+  },
 }
 
 export default function Badge({ status }) {
-  const style = statusStyles[status?.toLowerCase()] || 'bg-gray-100 text-gray-600'
+  const normalized = status?.toLowerCase()
+  const style = statusStyles[normalized] || { background: 'var(--row-hover)', color: 'var(--text-secondary)' }
+
   return (
-    <span className={`${style} rounded-full px-3 py-1 text-xs font-medium`}>
-      {status?.toUpperCase()}
+    <span className="rounded-full px-3 py-1 text-xs font-medium" style={style}>
+      {(status || 'unknown').toUpperCase()}
     </span>
   )
 }

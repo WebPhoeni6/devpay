@@ -28,8 +28,8 @@ export default function RegisterPage() {
 
   return (
     <AuthLayout>
-      <h1 className="text-xl font-bold text-[#1A1A2E] mb-1">Create account</h1>
-      <p className="text-sm text-[#6B7280] mb-6">Start managing invoices today</p>
+      <h1 className="text-xl font-bold text-[var(--text-primary)] mb-1">Create account</h1>
+      <p className="text-sm text-[var(--text-secondary)] mb-6">Start managing invoices today</p>
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
           label="Full Name"
@@ -55,16 +55,16 @@ export default function RegisterPage() {
           name="password"
           value={form.password}
           onChange={handleChange}
-          placeholder="••••••••"
+          placeholder="********"
           required
         />
         <Button type="submit" className="w-full justify-center" disabled={loading}>
           {loading ? 'Creating account...' : 'Create account'}
         </Button>
       </form>
-      <p className="text-sm text-center text-[#6B7280] mt-4">
+      <p className="text-sm text-center text-[var(--text-secondary)] mt-4">
         Already have an account?{' '}
-        <Link to="/login" className="text-[#3B3FD8] font-medium hover:underline">
+        <Link to="/login" className="text-[var(--primary)] font-medium hover:underline">
           Sign in
         </Link>
       </p>

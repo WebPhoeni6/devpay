@@ -26,8 +26,8 @@ export default function LoginPage() {
 
   return (
     <AuthLayout>
-      <h1 className="text-xl font-bold text-[#1A1A2E] mb-1">Sign in</h1>
-      <p className="text-sm text-[#6B7280] mb-6">Enter your credentials to continue</p>
+      <h1 className="text-xl font-bold text-[var(--text-primary)] mb-1">Sign in</h1>
+      <p className="text-sm text-[var(--text-secondary)] mb-6">Enter your credentials to continue</p>
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
           label="Email"
@@ -44,16 +44,16 @@ export default function LoginPage() {
           name="password"
           value={form.password}
           onChange={handleChange}
-          placeholder="••••••••"
+          placeholder="********"
           required
         />
         <Button type="submit" className="w-full justify-center" disabled={loading}>
           {loading ? 'Signing in...' : 'Sign in'}
         </Button>
       </form>
-      <p className="text-sm text-center text-[#6B7280] mt-4">
+      <p className="text-sm text-center text-[var(--text-secondary)] mt-4">
         Don&apos;t have an account?{' '}
-        <Link to="/register" className="text-[#3B3FD8] font-medium hover:underline">
+        <Link to="/register" className="text-[var(--primary)] font-medium hover:underline">
           Register
         </Link>
       </p>

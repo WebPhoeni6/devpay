@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'react-hot-toast'
-import { Pencil, Trash2, Plus } from 'lucide-react'
+import { Pencil, Trash2, Plus, Search, ArrowUpDown, ChevronUp, ChevronDown } from 'lucide-react'
 import Card from '../../components/Card'
 import Button from '../../components/Button'
 import Modal from '../../components/Modal'
@@ -31,15 +31,99 @@ function ClientForm({ initial, onSubmit, loading, onClose }) {
   )
 }
 
+function SortIndicator({ active, direction }) {
+  if (!active) return <ArrowUpDown size={14} className="text-[var(--text-muted)]" />
+  return direction === 'asc'
+    ? <ChevronUp size={14} className="text-[var(--primary)]" />
+    : <ChevronDown size={14} className="text-[var(--primary)]" />
+}
+
 export default function ClientListPage() {
   const { clients, loading, fetchClients, createClient, updateClient, deleteClient } = useClientStore()
   const [modal, setModal] = useState(null) // null | { mode: 'create' } | { mode: 'edit', client }
   const [saving, setSaving] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
+  const [search, setSearch] = useState('')
+  const [phoneFilter, setPhoneFilter] = useState('all')
+  const [sortConfig, setSortConfig] = useState({ key: 'created_at', direction: 'desc' })
+  const [selectedRows, setSelectedRows] = useState(new Set())
 
-  useEffect(() => { fetchClients() }, [])
+  useEffect(() => { fetchClients() }, [fetchClients])
 
-  const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'
+  const formatDate = (d) => (d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '--')
+
+  const filteredClients = useMemo(() => {
+    const query = search.trim().toLowerCase()
+
+    const filtered = clients.filter((client) => {
+      const name = client.name?.toLowerCase() || ''
+      const email = client.email?.toLowerCase() || ''
+      const phone = client.phone?.toLowerCase() || ''
+
+      const matchesSearch = !query || name.includes(query) || email.includes(query) || phone.includes(query)
+      const hasPhone = Boolean(client.phone)
+      const matchesPhone = phoneFilter === 'all'
+        || (phoneFilter === 'with_phone' && hasPhone)
+        || (phoneFilter === 'without_phone' && !hasPhone)
+
+      return matchesSearch && matchesPhone
+    })
+
+    filtered.sort((a, b) => {
+      const direction = sortConfig.direction === 'asc' ? 1 : -1
+      switch (sortConfig.key) {
+        case 'name':
+          return (a.name || '').localeCompare(b.name || '') * direction
+        case 'email':
+          return (a.email || '').localeCompare(b.email || '') * direction
+        case 'phone':
+          return (a.phone || '').localeCompare(b.phone || '') * direction
+        case 'created_at':
+        default:
+          return ((new Date(a.created_at || 0)).getTime() - (new Date(b.created_at || 0)).getTime()) * direction
+      }
+    })
+
+    return filtered
+  }, [clients, search, phoneFilter, sortConfig])
+
+  useEffect(() => {
+    setSelectedRows((prev) => {
+      const valid = new Set(clients.map((client) => String(client.id)))
+      return new Set(Array.from(prev).filter((id) => valid.has(id)))
+    })
+  }, [clients])
+
+  const visibleIds = filteredClients.map((client) => String(client.id))
+  const allVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedRows.has(id))
+
+  const toggleSort = (key) => {
+    setSortConfig((prev) => {
+      if (prev.key !== key) return { key, direction: 'asc' }
+      return { key, direction: prev.direction === 'asc' ? 'desc' : 'asc' }
+    })
+  }
+
+  const toggleRow = (id) => {
+    setSelectedRows((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const toggleAllVisible = () => {
+    setSelectedRows((prev) => {
+      const next = new Set(prev)
+      if (allVisibleSelected) {
+        visibleIds.forEach((id) => next.delete(id))
+      } else {
+        visibleIds.forEach((id) => next.add(id))
+      }
+      return next
+    })
+  }
 
   const handleCreate = async (form) => {
     setSaving(true)
@@ -74,10 +158,10 @@ export default function ClientListPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-xl font-bold text-[#1A1A2E]">Clients</h1>
-          <p className="text-sm text-[#6B7280]">Manage your clients</p>
+          <h1 className="text-xl font-bold text-[var(--text-primary)]">Clients</h1>
+          <p className="text-sm text-[var(--text-secondary)]">Manage your clients</p>
         </div>
         <Button onClick={() => setModal({ mode: 'create' })} className="flex items-center gap-2">
           <Plus size={16} /> Add Client
@@ -85,52 +169,139 @@ export default function ClientListPage() {
       </div>
 
       <Card className="p-0 overflow-hidden">
+        <div className="px-6 py-4 border-b border-[color:var(--border)] flex items-center justify-between flex-wrap gap-3">
+          <div className="relative min-w-[240px] flex-1 max-w-md">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Filter by name, email or phone"
+              className="w-full border border-[color:var(--border-muted)] bg-[var(--bg-surface)] rounded-lg pl-9 pr-3 py-2 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+            />
+          </div>
+
+          <select
+            value={phoneFilter}
+            onChange={(e) => setPhoneFilter(e.target.value)}
+            className="border border-[color:var(--border-muted)] bg-[var(--bg-surface)] rounded-lg px-3 py-2 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+          >
+            <option value="all">All clients</option>
+            <option value="with_phone">With phone</option>
+            <option value="without_phone">Without phone</option>
+          </select>
+        </div>
+
+        {selectedRows.size > 0 && (
+          <div className="px-6 py-3 border-b border-[color:var(--border)] bg-[var(--bg-surface-muted)] flex items-center justify-between">
+            <p className="text-sm text-[var(--text-secondary)]">
+              {selectedRows.size} row{selectedRows.size === 1 ? '' : 's'} selected
+            </p>
+            <button
+              type="button"
+              onClick={() => setSelectedRows(new Set())}
+              className="text-sm font-medium text-[var(--primary)] hover:text-[var(--primary-hover)]"
+            >
+              Clear
+            </button>
+          </div>
+        )}
+
         {loading ? (
-          <div className="px-6 py-8 text-sm text-[#6B7280]">Loading...</div>
-        ) : clients.length === 0 ? (
-          <div className="px-6 py-8 text-sm text-[#6B7280]">No clients yet. Add your first client.</div>
+          <div className="px-6 py-8 text-sm text-[var(--text-secondary)]">Loading...</div>
+        ) : filteredClients.length === 0 ? (
+          <div className="px-6 py-8 text-sm text-[var(--text-secondary)]">No clients match your current filters.</div>
         ) : (
-          <table className="w-full">
-            <thead>
-              <tr className="text-xs text-[#6B7280] border-b border-gray-100">
-                <th className="text-left py-3 px-6 font-medium">Name</th>
-                <th className="text-left py-3 px-6 font-medium">Email</th>
-                <th className="text-left py-3 px-6 font-medium">Phone</th>
-                <th className="text-left py-3 px-6 font-medium">Created At</th>
-                <th className="text-left py-3 px-6 font-medium">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {clients.map((client) => (
-                <tr key={client.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                  <td className="py-4 px-6 text-sm font-medium text-[#1A1A2E]">{client.name}</td>
-                  <td className="py-4 px-6 text-sm text-[#6B7280]">{client.email}</td>
-                  <td className="py-4 px-6 text-sm text-[#6B7280]">{client.phone || '—'}</td>
-                  <td className="py-4 px-6 text-sm text-[#6B7280]">{formatDate(client.created_at)}</td>
-                  <td className="py-4 px-6">
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => setModal({ mode: 'edit', client })}
-                        className="p-1.5 text-[#6B7280] hover:text-[#3B3FD8] hover:bg-[#E8E9FB] rounded-lg transition-colors"
-                      >
-                        <Pencil size={15} />
-                      </button>
-                      <button
-                        onClick={() => setDeleteId(client.id)}
-                        className="p-1.5 text-[#6B7280] hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                      >
-                        <Trash2 size={15} />
-                      </button>
-                    </div>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="text-xs text-[var(--text-secondary)] border-b border-[color:var(--border)]">
+                  <th className="w-12 text-left py-3 px-4">
+                    <input
+                      type="checkbox"
+                      checked={allVisibleSelected}
+                      onChange={toggleAllVisible}
+                      className="h-4 w-4 accent-[var(--primary)]"
+                      aria-label="Select all visible clients"
+                    />
+                  </th>
+                  <th className="text-left py-3 px-4 font-medium">
+                    <button type="button" onClick={() => toggleSort('name')} className="inline-flex items-center gap-1">
+                      Name
+                      <SortIndicator active={sortConfig.key === 'name'} direction={sortConfig.direction} />
+                    </button>
+                  </th>
+                  <th className="text-left py-3 px-4 font-medium">
+                    <button type="button" onClick={() => toggleSort('email')} className="inline-flex items-center gap-1">
+                      Email
+                      <SortIndicator active={sortConfig.key === 'email'} direction={sortConfig.direction} />
+                    </button>
+                  </th>
+                  <th className="text-left py-3 px-4 font-medium">
+                    <button type="button" onClick={() => toggleSort('phone')} className="inline-flex items-center gap-1">
+                      Phone
+                      <SortIndicator active={sortConfig.key === 'phone'} direction={sortConfig.direction} />
+                    </button>
+                  </th>
+                  <th className="text-left py-3 px-4 font-medium">
+                    <button type="button" onClick={() => toggleSort('created_at')} className="inline-flex items-center gap-1">
+                      Created At
+                      <SortIndicator active={sortConfig.key === 'created_at'} direction={sortConfig.direction} />
+                    </button>
+                  </th>
+                  <th className="text-left py-3 px-4 font-medium">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filteredClients.map((client) => {
+                  const id = String(client.id)
+                  const isSelected = selectedRows.has(id)
+                  return (
+                    <tr
+                      key={id}
+                      className={`border-b border-[color:var(--border)] transition-colors ${
+                        isSelected ? 'bg-[var(--row-selected)]' : 'hover:bg-[var(--row-hover)]'
+                      }`}
+                    >
+                      <td className="py-3 px-4">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleRow(id)}
+                          className="h-4 w-4 accent-[var(--primary)]"
+                          aria-label={`Select ${client.name}`}
+                        />
+                      </td>
+                      <td className="py-3 px-4 text-sm font-medium text-[var(--text-primary)]">{client.name}</td>
+                      <td className="py-3 px-4 text-sm text-[var(--text-secondary)]">{client.email}</td>
+                      <td className="py-3 px-4 text-sm text-[var(--text-secondary)]">{client.phone || '--'}</td>
+                      <td className="py-3 px-4 text-sm text-[var(--text-secondary)]">{formatDate(client.created_at)}</td>
+                      <td className="py-3 px-4">
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setModal({ mode: 'edit', client })}
+                            className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--primary)] hover:bg-[var(--primary-soft)] rounded-lg transition-colors"
+                          >
+                            <Pencil size={15} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setDeleteId(client.id)}
+                            className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--danger)] hover:bg-[var(--danger-soft)] rounded-lg transition-colors"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
       </Card>
 
-      {/* Create/Edit modal */}
       {modal && (
         <Modal
           title={modal.mode === 'create' ? 'Add Client' : 'Edit Client'}
@@ -145,10 +316,9 @@ export default function ClientListPage() {
         </Modal>
       )}
 
-      {/* Delete confirm */}
       {deleteId && (
         <Modal title="Delete Client" onClose={() => setDeleteId(null)}>
-          <p className="text-sm text-[#6B7280] mb-4">Are you sure you want to delete this client? This cannot be undone.</p>
+          <p className="text-sm text-[var(--text-secondary)] mb-4">Are you sure you want to delete this client? This cannot be undone.</p>
           <div className="flex gap-3">
             <Button variant="danger" onClick={handleDelete} className="flex-1 justify-center">Delete</Button>
             <Button variant="outline" onClick={() => setDeleteId(null)} className="flex-1 justify-center">Cancel</Button>
