@@ -1,0 +1,173 @@
+name: DevPay CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  AWS_REGION: us-east-1
+  ECR_BACKEND_REPO: devpay-backend
+  ECR_FRONTEND_REPO: devpay-frontend
+
+jobs:
+  # ─────────────────────────────────────────
+  # JOB 1 — Run Django tests
+  # ─────────────────────────────────────────
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: devpay
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: webphoenix
+        ports:
+          - "5432:5432"
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r backend/requirements.txt
+
+      - name: Run Django tests
+        working-directory: backend
+        run: python manage.py test
+        env:
+          DATABASE_URL: postgres://postgres:webphoenix@localhost:5432/devpay
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          DEBUG: "False"
+          PAYSTACK_SECRET_KEY: sk_test_dummy
+          PAYSTACK_PUBLIC_KEY: pk_test_dummy
+          ALLOWED_HOSTS: localhost,127.0.0.1
+
+  # ─────────────────────────────────────────
+  # JOB 2 — Build images & push to ECR
+  # Only runs on push to main (not PRs)
+  # ─────────────────────────────────────────
+  build-and-push:
+    name: Build & Push to ECR
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    outputs:
+      image_tag: ${{ steps.meta.outputs.tag }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Generate image tag
+        id: meta
+        run: echo "tag=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_BACKEND_REPO }}:${{ github.sha }}" >> $GITHUB_OUTPUT
+
+      - name: Build & push backend image
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          SHA: ${{ github.sha }}
+        run: |
+          docker build -t $REGISTRY/$ECR_BACKEND_REPO:$SHA -t $REGISTRY/$ECR_BACKEND_REPO:latest ./backend
+          docker push $REGISTRY/$ECR_BACKEND_REPO:$SHA
+          docker push $REGISTRY/$ECR_BACKEND_REPO:latest
+
+      - name: Build & push frontend image
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          SHA: ${{ github.sha }}
+        run: |
+          docker build \
+            --build-arg VITE_API_URL=${{ secrets.VITE_API_URL }} \
+            -t $REGISTRY/$ECR_FRONTEND_REPO:$SHA \
+            -t $REGISTRY/$ECR_FRONTEND_REPO:latest \
+            ./frontend
+          docker push $REGISTRY/$ECR_FRONTEND_REPO:$SHA
+          docker push $REGISTRY/$ECR_FRONTEND_REPO:latest
+
+  # ─────────────────────────────────────────
+  # JOB 3 — SSH into EC2 and deploy
+  # ─────────────────────────────────────────
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Deploy via SSH to EC2
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          envs: AWS_REGION,ECR_BACKEND_REPO,ECR_FRONTEND_REPO
+          script: |
+            # Authenticate Docker on EC2 with ECR
+            aws ecr get-login-password --region ${{ env.AWS_REGION }} | \
+              docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
+
+            # Pull latest images
+            docker pull ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_BACKEND_REPO }}:latest
+            docker pull ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_FRONTEND_REPO }}:latest
+
+            # Go to app directory
+            cd /home/ec2-user/devpay
+
+            # Write .env for backend
+            cat > backend/.env <<'ENVEOF'
+            SECRET_KEY=${{ secrets.SECRET_KEY }}
+            DEBUG=False
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
+            PAYSTACK_SECRET_KEY=${{ secrets.PAYSTACK_SECRET_KEY }}
+            PAYSTACK_PUBLIC_KEY=${{ secrets.PAYSTACK_PUBLIC_KEY }}
+            ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}
+            ENVEOF
+
+            # Override image names in compose to use ECR images
+            export BACKEND_IMAGE=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_BACKEND_REPO }}:latest
+            export FRONTEND_IMAGE=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_FRONTEND_REPO }}:latest
+
+            # Pull and restart containers
+            docker compose pull
+            docker compose up -d --no-build --remove-orphans
+
+            # Clean up old images
+            docker image prune -f

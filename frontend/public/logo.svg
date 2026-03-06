@@ -1,0 +1,37 @@
+<svg width="130" height="36" viewBox="0 0 130 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- === "dev" === -->
+
+  <!-- d -->
+  <path d="M6 8 L6 28" stroke="#1A1A2E" stroke-width="3.2" stroke-linecap="round" />
+  <path d="M6 9 Q6 9 9 8 Q16 7 16 18 Q16 29 9 28 Q6 27 6 27" stroke="#1A1A2E" stroke-width="3.2"
+    stroke-linecap="round" stroke-linejoin="round" fill="none" />
+
+  <!-- e -->
+  <path d="M21 18 L33 18 Q33 10 27 10 Q21 10 21 18 Q21 26 27 26 Q31 26 33 23" stroke="#1A1A2E"
+    stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+
+  <!-- v -->
+  <path d="M37 10 L43 26 L49 10" stroke="#1A1A2E" stroke-width="3.2" stroke-linecap="round"
+    stroke-linejoin="round" fill="none" />
+
+  <!-- === "pay" === -->
+
+  <!-- p -->
+  <path d="M56 10 L56 32" stroke="#3B3FD8" stroke-width="3.2" stroke-linecap="round" />
+  <path d="M56 10 Q56 10 59 10 Q67 10 67 18 Q67 26 59 26 Q56 26 56 26" stroke="#3B3FD8"
+    stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+
+  <!-- a -->
+  <path d="M80 26 Q80 26 77 26 Q71 26 71 18 Q71 10 77 10 Q83 10 83 18 L83 26" stroke="#3B3FD8"
+    stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  <path d="M71 20 Q73 26 80 26" stroke="#3B3FD8" stroke-width="3.2" stroke-linecap="round"
+    fill="none" />
+
+  <!-- y -->
+  <path d="M88 10 L94 20 L100 10" stroke="#3B3FD8" stroke-width="3.2" stroke-linecap="round"
+    stroke-linejoin="round" fill="none" />
+  <path d="M94 20 L94 32" stroke="#3B3FD8" stroke-width="3.2" stroke-linecap="round" />
+
+  <!-- green dot -->
+  <circle cx="107" cy="26" r="3.2" fill="#22C55E" />
+</svg>
