@@ -152,14 +152,14 @@ jobs:
             cd /home/ec2-user/devpay
 
             # Write .env for backend
-            cat > backend/.env <<'ENVEOF'
-            SECRET_KEY=${{ secrets.SECRET_KEY }}
-            DEBUG=False
-            DATABASE_URL=${{ secrets.DATABASE_URL }}
-            PAYSTACK_SECRET_KEY=${{ secrets.PAYSTACK_SECRET_KEY }}
-            PAYSTACK_PUBLIC_KEY=${{ secrets.PAYSTACK_PUBLIC_KEY }}
-            ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}
-            ENVEOF
+            cat > .env <<ENVEOF
+SECRET_KEY=${{ secrets.SECRET_KEY }}
+DEBUG=False
+DATABASE_URL=${{ secrets.DATABASE_URL }}
+PAYSTACK_SECRET_KEY=${{ secrets.PAYSTACK_SECRET_KEY }}
+PAYSTACK_PUBLIC_KEY=${{ secrets.PAYSTACK_PUBLIC_KEY }}
+ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}
+ENVEOF
 
             # Override image names in compose to use ECR images
             export BACKEND_IMAGE=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_BACKEND_REPO }}:latest
