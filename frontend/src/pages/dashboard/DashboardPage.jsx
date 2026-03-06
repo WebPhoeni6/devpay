@@ -154,14 +154,14 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className={`flex gap-6 ${selectedInvoice ? 'mr-80' : ''}`}>
+    <div className={`flex gap-4 lg:gap-6 ${selectedInvoice ? 'lg:mr-80' : ''}`}>
       <div className="flex-1 space-y-6">
         <div>
           <h1 className="text-xl font-bold text-[var(--text-primary)]">Dashboard</h1>
           <p className="text-sm text-[var(--text-secondary)]">Welcome back. Here is your invoice overview.</p>
         </div>
 
-        <div className="flex gap-6 flex-col lg:flex-row">
+        <div className="flex gap-4 lg:gap-6 flex-col lg:flex-row">
           <Card className="flex-1">
             <div className="flex items-start justify-between mb-4 gap-3 flex-wrap">
               <div>
@@ -220,10 +220,10 @@ export default function DashboardPage() {
         </div>
 
         <Card className="p-0 overflow-hidden">
-          <div className="px-6 py-4 border-b border-[color:var(--border)] flex items-center justify-between gap-3 flex-wrap">
+          <div className="px-4 sm:px-6 py-4 border-b border-[color:var(--border)] flex items-center justify-between gap-3 flex-wrap">
             <h2 className="font-semibold text-[var(--text-primary)]">Billing &amp; Invoices</h2>
-            <div className="flex items-center gap-3 flex-wrap">
-              <div className="relative min-w-[220px]">
+            <div className="flex items-center gap-3 flex-wrap w-full sm:w-auto">
+              <div className="relative w-full sm:w-auto sm:min-w-[220px]">
                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
                 <input
                   value={search}
@@ -235,7 +235,7 @@ export default function DashboardPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="border border-[color:var(--border-muted)] bg-[var(--bg-surface)] rounded-lg px-3 py-2 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+                className="w-full sm:w-auto border border-[color:var(--border-muted)] bg-[var(--bg-surface)] rounded-lg px-3 py-2 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
               >
                 {statusOptions.map((status) => (
                   <option key={status} value={status}>
@@ -247,7 +247,7 @@ export default function DashboardPage() {
           </div>
 
           {selectedRows.size > 0 && (
-            <div className="px-6 py-3 border-b border-[color:var(--border)] bg-[var(--bg-surface-muted)] flex items-center justify-between">
+            <div className="px-4 sm:px-6 py-3 border-b border-[color:var(--border)] bg-[var(--bg-surface-muted)] flex items-center justify-between gap-3 flex-wrap">
               <p className="text-sm text-[var(--text-secondary)]">
                 {selectedRows.size} row{selectedRows.size === 1 ? '' : 's'} selected
               </p>
@@ -262,100 +262,145 @@ export default function DashboardPage() {
           )}
 
           {loading ? (
-            <div className="px-6 py-8 text-sm text-[var(--text-secondary)]">Loading...</div>
+            <div className="px-4 sm:px-6 py-8 text-sm text-[var(--text-secondary)]">Loading...</div>
           ) : recentInvoices.length === 0 ? (
-            <div className="px-6 py-8 text-sm text-[var(--text-secondary)]">No invoices match your filters.</div>
+            <div className="px-4 sm:px-6 py-8 text-sm text-[var(--text-secondary)]">No invoices match your filters.</div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="text-xs text-[var(--text-secondary)] border-b border-[color:var(--border)]">
-                    <th className="w-12 text-left py-3 px-4">
-                      <input
-                        type="checkbox"
-                        checked={allVisibleSelected}
-                        onChange={toggleAllVisible}
-                        className="h-4 w-4 accent-[var(--primary)]"
-                        aria-label="Select all visible rows"
-                      />
-                    </th>
-                    <th className="text-left py-3 px-4 font-medium">
-                      <button type="button" onClick={() => toggleSort('id')} className="inline-flex items-center gap-1">
-                        Invoice ID
-                        <SortIndicator active={sortConfig.key === 'id'} direction={sortConfig.direction} />
-                      </button>
-                    </th>
-                    <th className="text-left py-3 px-4 font-medium">
-                      <button type="button" onClick={() => toggleSort('client')} className="inline-flex items-center gap-1">
-                        Invoice Name
-                        <SortIndicator active={sortConfig.key === 'client'} direction={sortConfig.direction} />
-                      </button>
-                    </th>
-                    <th className="text-left py-3 px-4 font-medium">
-                      <button type="button" onClick={() => toggleSort('created_at')} className="inline-flex items-center gap-1">
-                        Start Date
-                        <SortIndicator active={sortConfig.key === 'created_at'} direction={sortConfig.direction} />
-                      </button>
-                    </th>
-                    <th className="text-left py-3 px-4 font-medium">
-                      <button type="button" onClick={() => toggleSort('due_date')} className="inline-flex items-center gap-1">
-                        Due Date
-                        <SortIndicator active={sortConfig.key === 'due_date'} direction={sortConfig.direction} />
-                      </button>
-                    </th>
-                    <th className="text-left py-3 px-4 font-medium">
-                      <button type="button" onClick={() => toggleSort('amount')} className="inline-flex items-center gap-1">
-                        Amount
-                        <SortIndicator active={sortConfig.key === 'amount'} direction={sortConfig.direction} />
-                      </button>
-                    </th>
-                    <th className="text-left py-3 px-4 font-medium">
-                      <button type="button" onClick={() => toggleSort('status')} className="inline-flex items-center gap-1">
-                        Status
-                        <SortIndicator active={sortConfig.key === 'status'} direction={sortConfig.direction} />
-                      </button>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {recentInvoices.map((inv) => {
-                    const id = String(inv.id)
-                    const isSelected = selectedRows.has(id)
-                    const isOpen = selectedInvoice?.id === inv.id
+            <>
+              <div className="sm:hidden divide-y divide-[color:var(--border)]">
+                {recentInvoices.map((inv) => {
+                  const id = String(inv.id)
+                  const isSelected = selectedRows.has(id)
+                  const isOpen = selectedInvoice?.id === inv.id
 
-                    return (
-                      <tr
-                        key={id}
-                        onClick={() => setSelectedInvoice(inv)}
-                        className={`border-b border-[color:var(--border)] cursor-pointer transition-colors ${
-                          isSelected || isOpen ? 'bg-[var(--row-selected)]' : 'hover:bg-[var(--row-hover)]'
-                        }`}
-                      >
-                        <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
-                          <input
-                            type="checkbox"
-                            checked={isSelected}
-                            onChange={() => toggleRow(id)}
-                            className="h-4 w-4 accent-[var(--primary)]"
-                            aria-label={`Select invoice ${shortId(inv.id)}`}
-                          />
-                        </td>
-                        <td className="py-3 px-4 text-sm text-[var(--text-secondary)]">{shortId(inv.id)}</td>
-                        <td className="py-3 px-4 text-sm font-medium text-[var(--text-primary)]">
-                          {inv.client?.name || inv.title || '--'}
-                        </td>
-                        <td className="py-3 px-4 text-sm text-[var(--text-secondary)]">{formatDate(inv.created_at)}</td>
-                        <td className="py-3 px-4 text-sm text-[var(--text-secondary)]">{formatDate(inv.due_date)}</td>
-                        <td className="py-3 px-4 text-sm font-medium text-[var(--text-primary)]">{formatAmount(inv.amount)}</td>
-                        <td className="py-3 px-4">
-                          <Badge status={inv.status} />
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
+                  return (
+                    <div
+                      key={id}
+                      onClick={() => setSelectedInvoice(inv)}
+                      className={`px-4 py-4 cursor-pointer transition-colors ${
+                        isSelected || isOpen ? 'bg-[var(--row-selected)]' : 'hover:bg-[var(--row-hover)]'
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleRow(id)}
+                          onClick={(e) => e.stopPropagation()}
+                          className="mt-1 h-4 w-4 accent-[var(--primary)]"
+                          aria-label={`Select invoice ${shortId(inv.id)}`}
+                        />
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between gap-3">
+                            <p className="text-sm font-semibold text-[var(--text-primary)] truncate">
+                              {inv.client?.name || inv.title || '--'}
+                            </p>
+                            <Badge status={inv.status} />
+                          </div>
+                          <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-[var(--text-secondary)]">
+                            <p>ID: {shortId(inv.id)}</p>
+                            <p className="text-right font-medium text-[var(--text-primary)]">{formatAmount(inv.amount)}</p>
+                            <p>Start: {formatDate(inv.created_at)}</p>
+                            <p className="text-right">Due: {formatDate(inv.due_date)}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+
+              <div className="hidden sm:block overflow-x-auto">
+                <table className="w-full min-w-[720px]">
+                  <thead>
+                    <tr className="text-xs text-[var(--text-secondary)] border-b border-[color:var(--border)]">
+                      <th className="w-12 text-left py-3 px-3 sm:px-4">
+                        <input
+                          type="checkbox"
+                          checked={allVisibleSelected}
+                          onChange={toggleAllVisible}
+                          className="h-4 w-4 accent-[var(--primary)]"
+                          aria-label="Select all visible rows"
+                        />
+                      </th>
+                      <th className="text-left py-3 px-3 sm:px-4 font-medium">
+                        <button type="button" onClick={() => toggleSort('id')} className="inline-flex items-center gap-1">
+                          Invoice ID
+                          <SortIndicator active={sortConfig.key === 'id'} direction={sortConfig.direction} />
+                        </button>
+                      </th>
+                      <th className="text-left py-3 px-3 sm:px-4 font-medium">
+                        <button type="button" onClick={() => toggleSort('client')} className="inline-flex items-center gap-1">
+                          Invoice Name
+                          <SortIndicator active={sortConfig.key === 'client'} direction={sortConfig.direction} />
+                        </button>
+                      </th>
+                      <th className="text-left py-3 px-3 sm:px-4 font-medium">
+                        <button type="button" onClick={() => toggleSort('created_at')} className="inline-flex items-center gap-1">
+                          Start Date
+                          <SortIndicator active={sortConfig.key === 'created_at'} direction={sortConfig.direction} />
+                        </button>
+                      </th>
+                      <th className="text-left py-3 px-3 sm:px-4 font-medium">
+                        <button type="button" onClick={() => toggleSort('due_date')} className="inline-flex items-center gap-1">
+                          Due Date
+                          <SortIndicator active={sortConfig.key === 'due_date'} direction={sortConfig.direction} />
+                        </button>
+                      </th>
+                      <th className="text-left py-3 px-3 sm:px-4 font-medium">
+                        <button type="button" onClick={() => toggleSort('amount')} className="inline-flex items-center gap-1">
+                          Amount
+                          <SortIndicator active={sortConfig.key === 'amount'} direction={sortConfig.direction} />
+                        </button>
+                      </th>
+                      <th className="text-left py-3 px-3 sm:px-4 font-medium">
+                        <button type="button" onClick={() => toggleSort('status')} className="inline-flex items-center gap-1">
+                          Status
+                          <SortIndicator active={sortConfig.key === 'status'} direction={sortConfig.direction} />
+                        </button>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recentInvoices.map((inv) => {
+                      const id = String(inv.id)
+                      const isSelected = selectedRows.has(id)
+                      const isOpen = selectedInvoice?.id === inv.id
+
+                      return (
+                        <tr
+                          key={id}
+                          onClick={() => setSelectedInvoice(inv)}
+                          className={`border-b border-[color:var(--border)] cursor-pointer transition-colors ${
+                            isSelected || isOpen ? 'bg-[var(--row-selected)]' : 'hover:bg-[var(--row-hover)]'
+                          }`}
+                        >
+                          <td className="py-3 px-3 sm:px-4" onClick={(e) => e.stopPropagation()}>
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => toggleRow(id)}
+                              className="h-4 w-4 accent-[var(--primary)]"
+                              aria-label={`Select invoice ${shortId(inv.id)}`}
+                            />
+                          </td>
+                          <td className="py-3 px-3 sm:px-4 text-sm text-[var(--text-secondary)]">{shortId(inv.id)}</td>
+                          <td className="py-3 px-3 sm:px-4 text-sm font-medium text-[var(--text-primary)]">
+                            {inv.client?.name || inv.title || '--'}
+                          </td>
+                          <td className="py-3 px-3 sm:px-4 text-sm text-[var(--text-secondary)]">{formatDate(inv.created_at)}</td>
+                          <td className="py-3 px-3 sm:px-4 text-sm text-[var(--text-secondary)]">{formatDate(inv.due_date)}</td>
+                          <td className="py-3 px-3 sm:px-4 text-sm font-medium text-[var(--text-primary)]">{formatAmount(inv.amount)}</td>
+                          <td className="py-3 px-3 sm:px-4">
+                            <Badge status={inv.status} />
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </Card>
       </div>
@@ -369,3 +414,4 @@ export default function DashboardPage() {
     </div>
   )
 }
+

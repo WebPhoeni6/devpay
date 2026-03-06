@@ -21,7 +21,7 @@ export default function InvoiceCreatePage() {
     status: 'draft',
   })
 
-  useEffect(() => { fetchClients() }, [])
+  useEffect(() => { fetchClients() }, [fetchClients])
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
 
@@ -49,7 +49,7 @@ export default function InvoiceCreatePage() {
   }
 
   return (
-    <div className="max-w-xl space-y-6">
+    <div className="w-full max-w-2xl space-y-6">
       <div>
         <h1 className="text-xl font-bold text-[var(--text-primary)]">New Invoice</h1>
         <p className="text-sm text-[var(--text-secondary)]">Fill in the details below to create an invoice</p>
@@ -131,7 +131,7 @@ export default function InvoiceCreatePage() {
             </select>
           </div>
 
-          <div className="flex gap-3 pt-2">
+          <div className="flex flex-col sm:flex-row gap-3 pt-2">
             <Button type="submit" disabled={loading} className="flex-1 justify-center">
               {loading ? 'Creating...' : 'Create Invoice'}
             </Button>

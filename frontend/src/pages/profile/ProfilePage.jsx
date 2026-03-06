@@ -35,17 +35,17 @@ export default function ProfilePage() {
       </div>
 
       <Card className="p-0 overflow-hidden">
-        <div className="p-6 border-b border-[color:var(--border)] flex items-center gap-4">
+        <div className="p-4 sm:p-6 border-b border-[color:var(--border)] flex items-center gap-4">
           <div className="h-14 w-14 rounded-full bg-[var(--primary)] text-white font-semibold flex items-center justify-center text-lg">
             {(user?.full_name || user?.email || 'U')[0].toUpperCase()}
           </div>
-          <div>
-            <p className="text-lg font-semibold text-[var(--text-primary)]">{user?.full_name || 'Unnamed User'}</p>
-            <p className="text-sm text-[var(--text-secondary)]">{user?.email || '--'}</p>
+          <div className="min-w-0">
+            <p className="text-lg font-semibold text-[var(--text-primary)] truncate">{user?.full_name || 'Unnamed User'}</p>
+            <p className="text-sm text-[var(--text-secondary)] truncate">{user?.email || '--'}</p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 sm:p-6">
           <div className="rounded-xl border border-[color:var(--border)] bg-[var(--bg-surface-muted)] p-4 space-y-3">
             <div className="flex items-center gap-2 text-[var(--text-secondary)]">
               <User2 size={16} />
