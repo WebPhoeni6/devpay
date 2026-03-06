@@ -18,6 +18,7 @@ services:
   backend:
     image: ${BACKEND_IMAGE:-devpay-backend}
     build: ./backend
+    working_dir: /app
     command: >
       sh -c "python manage.py migrate --noinput &&
              python manage.py seed --email demo@devpay.com --password Demo1234! &&
